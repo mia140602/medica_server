@@ -14,9 +14,9 @@ router.get('*', function(req, res, next){
 
 router.get('/', async function(req, res) {
     try {
-      var appointments = await AppointmentModel.find({});
+        var username = req.cookies['username'];
+      var appointments = await db.getdoctorappointment(username);
       var doctor = await db.getdoctordetails(username);
-      var username = req.cookies['username'];
       res.render('appointment.ejs', { list: appointments ,doctor: doctor});
     } catch (err) {
       console.error(err);
@@ -57,38 +57,52 @@ router.post('/add_appointment',function(req,res){
 });
 
 
-router.get('/edit_appointment/:id',function(req,res){
-    var id = req.params.id;
-    db.getappointmentbyid(id,function(err,result){
+router.get('/edit_appointment/:id', async function(req, res) {
+    try {
+        var id = req.params.id;
+        var result = await db.getappointmentbyid(id);
         console.log(result);
-        res.render('edit_appointment.ejs',{list : result});
-    });
-
+        res.render('edit_appointment.ejs', {list : result});
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
 });
 
-router.post('/edit_appointment/:id',function(req,res){
-    var id = req.params.id;
-    db.editappointment(id,req.body.p_name,req.body.department,req.body.d_name,req.body.date,req.body.time,req.body.email,req.body.phone,function(err,result){
+router.post('/edit_appointment/:id', async function(req, res) {
+    try {
+        var id = req.params.id;
+        await db.editappointment(id, req.body.p_name, req.body.department, req.body.d_name, req.body.date, req.body.time, req.body.email, req.body.phone);
         res.redirect('/appointment');
-    });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
 });
 
 
-router.get('/delete_appointment/:id',function(req,res){
-    var id = req.params.id;
-    db.getappointmentbyid(id,function(err,result){
+router.get('/delete_appointment/:id', async function(req, res) {
+    try {
+        var id = req.params.id;
+        var result = await db.getappointmentbyid(id);
         console.log(result);
-        res.render('delete_appointment.ejs',{list:result});
-    })
-    
+        res.render('delete_appointment.ejs', {list : result});
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
 });
 
-router.post('/delete_appointment/:id',function(req,res){
-    var id =req.params.id;
-    db.deleteappointment(id,function(err,result){
+router.post('/delete_appointment/:id', async function(req, res) {
+    try {
+        var id = req.params.id;
+        await db.deleteappointment(id);
         res.redirect('/appointment');
-    });
-})
+    } catch (err) {
+        console.error(err);
+        res.status(500).send();
+    }
+});
 
 
 

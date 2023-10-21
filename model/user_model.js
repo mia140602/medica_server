@@ -31,8 +31,15 @@ const userSchema = new Schema({
     profileCompleted: {
         type: Boolean,
         default: false
-    }
-});
+    },
+    avatar: {
+        type: String,
+      },
+},
+{
+    timestamps: true
+  }
+);
 
 userSchema.pre('save',async function(next){
     if (!this.isModified('password')) {
@@ -56,5 +63,5 @@ userSchema.methods.comparePassword= async function(userPassword){
     }
 }
 
-const UserModel= db.model('user',userSchema);
+const UserModel= db.model('users',userSchema);
 module.exports=UserModel;

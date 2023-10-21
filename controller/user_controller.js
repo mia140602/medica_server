@@ -27,6 +27,7 @@ exports.login= async(req,res,next)=> {
             return res.status(400).json({status: false, message: 'Sai mật khẩu'});
         }
         const userData = {
+          id: user.id,
           email: user.email,
           name: user.fullName,
           nickName: user.nickName,

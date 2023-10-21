@@ -5,11 +5,10 @@ const userRouter= require('./routers/user_router');
 
 
 
-const app=express();
-app.use(body_parser.json());
-app.use('/',userRouter);
 
-module.exports=app;
+
+
+
 
 
 
@@ -26,6 +25,11 @@ var nodmailer = require ('nodemailer');
 var crypto = require ('crypto');
 var expressValidator = require ('express-validator');
 var  sweetalert = require('sweetalert2');
+
+
+const app=express();
+
+
 
 
 
@@ -50,23 +54,26 @@ var inbox = require ('./controllers/inbox');
 var appointment = require ('./controllers/appointment');
 
 var receipt = require ('./controllers/receipt');
-var chat = require ('./controllers/chat');
+
+var messenger= require('./controllers/messenger')
+
+
+const { Socket } = require('socket.io');
 
 
 
-
+// middleware
+app.use(express.json());
+// app.use(cors());
+app.use(body_parser.json());
+app.use('/',userRouter);
 app.set('view engine ', 'ejs');
-
-
-
-
 app.use(express.static('./public'));
 app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 app.use(cookie());
 
 //app.use(expressValidator());
-
 
 // var server =app.listen(3000 , function(){
 
@@ -89,4 +96,25 @@ app.use ('/inbox',inbox);
 app.use ('/appointment',appointment);
 app.use('/receipt',receipt);
 
+app.use('/messenger',messenger)
+
 // app.use('/doctors/add_doctor',add_doc);
+
+
+
+//doctor router
+const doctorsRouter = require('./routers/doctor_router'); 
+app.use('/api/doctors', doctorsRouter);
+
+
+//appointment router
+const appointmentRouter= require('./routers/appointment_router');
+app.use('/api/appointments',appointmentRouter);
+
+
+//department router
+
+const departmentRouter= require('./routers/department_router');
+app.use('/api/departments',departmentRouter);
+
+module.exports=app;

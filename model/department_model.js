@@ -13,22 +13,6 @@ const departmentSchema = new Schema({
 
     
 });
-// const appointmentSchema = new Schema({
-//     doctorId: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: 'doctors',
-//         required: true
-//     },
-//     userId: {
-//         type: mongoose.Schema.Types.ObjectId,
-//         ref: 'users',
-//         required: true
-//     },
-//     appointmentDate: {
-//         type: Date,
-//         required: true
-//     },
-//     // Add other fields as needed
-// });
+
 const DepartmentModel= db.model('departments',departmentSchema);
 module.exports=DepartmentModel;

@@ -1,9 +1,17 @@
 // var mysql = require("mysql");
+var mongoose = require('mongoose');
+var ObjectId = mongoose.Types.ObjectId;
+
 var DoctorModel = require("../model/doctor_model");
 var AppointmentModel=require("../model/appointment_model")
 var DepartmentModel= require("../model/department_model")
+var ComplainModel= require("../model/complain_model")
+var UserModel= require('../model/user_model');
+// var MessageModel= require('../model/message-model');
+var ConversationModel= require('../model/conversation_model')
+
 var express = require("express");
-const mongoose =require('mongoose');
+
 var router = express.Router();
 
 const con = mongoose.createConnection(`mongodb://127.0.0.1:27017/newMedical`).on('open',()=>{
@@ -149,10 +157,6 @@ module.exports.getAllDoc = async function () {
   }
 };
 
-// module.exports.getDocbyId = function (id, callback) {
-//   var query = "select * from doctor where id =" + id;
-//   con.query(query, callback);
-// };
 
 module.exports.getEmpbyId = function (id, callback) {
   var query = "select * from employee where id =" + id;
@@ -284,30 +288,38 @@ module.exports.deletemed = function (id, callback) {
   con.query(query, callback);
 };
 
-module.exports.postcomplain = function (
+
+
+module.exports.postcomplain = async function (
   message,
   name,
   email,
-  subject,
-  callback
+  subject
 ) {
-  var query =
-    "insert into complain (message,name,email,subject) values ('" +
-    message +
-    "','" +
-    name +
-    "','" +
-    email +
-    "','" +
-    subject +
-    "')";
-  console.log(query);
-  con.query(query, callback);
+  try {
+    const complain = new ComplainModel({
+      message: message,
+      name: name,
+      email: email,
+      subject: subject
+    });
+    const result = await complain.save();
+    return result;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
-module.exports.getcomplain = function (callback) {
-  var query = "select * from complain";
-  con.query(query, callback);
+module.exports.getcomplain = async function () {
+  try {
+    // const complains = await ComplainModel.find({});
+    const complains = await DoctorModel.find({});
+    return complains;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
 // module.exports.add_appointment = function (
@@ -339,6 +351,30 @@ module.exports.getcomplain = function (callback) {
 //   con.query(query, callback);
 // };
 
+
+
+// appointment
+// Trong db_controller.js
+ module.exports.getdoctorappointment= async function (doctorUsername) {
+  try {
+    const doctor = await DoctorModel.findOne({ userName: doctorUsername });
+    if (!doctor) {
+      console.error(`No doctor found with username: ${doctorUsername}`);
+      return [];
+    }
+    const appointments = await AppointmentModel.find({ doctor: doctor._id })
+    .populate('patientId')
+    .populate({
+      path: 'doctor',
+      populate: { path: 'department' }
+    })
+    ;
+    return appointments;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
 module.exports.getallappointment = async function () {
   try {
     const appointment = await AppointmentModel.find({});
@@ -391,13 +427,17 @@ module.exports.searchEmp = function (key, callback) {
   console.log(query);
 };
 
-module.exports.getappointmentbyid = function (id, callback) {
-  var query = "select * from appointment where id=" + id;
-  console.log(query);
-  con.query(query, callback);
+module.exports.getappointmentbyid = async function (id) {
+  try {
+    const appointment = await AppointmentModel.findById(id);
+    return appointment;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
-module.exports.editappointment = function (
+module.exports.editappointment = async function (
   id,
   p_name,
   department,
@@ -405,32 +445,33 @@ module.exports.editappointment = function (
   date,
   time,
   email,
-  phone,
-  callback
+  phone
 ) {
-  var query =
-    "update appointment set patient_name='" +
-    p_name +
-    "',department='" +
-    department +
-    "',doctor_name='" +
-    d_name +
-    "',date='" +
-    date +
-    "',time='" +
-    time +
-    "',email='" +
-    email +
-    "',phone='" +
-    phone +
-    "' where id=" +
-    id;
-  con.query(query, callback);
+  try {
+    const appointment = await AppointmentModel.findByIdAndUpdate(id, {
+      patient_name: p_name,
+      department: department,
+      doctor_name: d_name,
+      date: date,
+      time: time,
+      email: email,
+      phone: phone
+    }, { new: true });
+    return appointment;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 
-module.exports.deleteappointment = function (id, callback) {
-  var query = "delete from appointment where id=" + id;
-  con.query(query, callback);
+module.exports.deleteappointment = async function (id) {
+  try {
+    const result = await AppointmentModel.findByIdAndRemove(id);
+    return result;
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
 };
 //module.exports =router;
 
@@ -611,14 +652,17 @@ module.exports.updateverify = function (email, email_status, callback) {
   con.query(query, callback);
 };
 
-module.exports.add_dept = function (name, desc, callback) {
-  var query =
-    "insert into departments(department_name,department_desc) values ('" +
-    name +
-    "','" +
-    desc +
-    "')";
-  con.query(query, callback);
+module.exports.add_dept = async function (name, desc, img) {
+  try {
+    const newDepartment =  DepartmentModel.create ({
+      department_name: name,
+      department_desc: desc,
+      img_path: img
+    });
+    
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 module.exports.getalldept =async function () {
@@ -714,4 +758,144 @@ module.exports.edit_leave = function (
     "' where id=" +
     id;
   con.query(query, callback);
+};
+
+
+//inbox
+
+module.exports.getAllInbox = async function (doctorId) {
+  try {
+    const conversations = await ConversationModel.find({
+      doctorId: doctorId
+    }).populate('userId'); // Sử dụng populate để lấy thông tin user tương ứng với conversation
+
+    return conversations;
+  } catch (err) {
+    console.error("Error in getAllInbox:", err);
+    throw err; 
+  }
+};
+
+
+module.exports.searchUser = async function (user) {
+  const searchQuery = user.replace("+88", "");
+
+  try {
+    if (searchQuery !== "") {
+      const users = await UserModel.find({
+        $or: [
+          { name: { $regex: searchQuery, $options: 'i' } },
+          { mobile: { $regex: "^" + "+88" + searchQuery } },
+          { email: { $regex: "^" + searchQuery + "$", $options: 'i' } },
+        ],
+      }, "name avatar");
+
+      return users;
+    } else {
+      throw new Error("You must provide some text to search!");
+    }
+  } catch (err) {
+    throw err;
+  }
+};
+
+module.exports.addConversation = async function (req) {
+  try {
+    const newConversation = new ConversationModel({
+      creator: {
+        id: req.user.userid,
+        name: req.user.username,
+        avatar: req.user.avatar || null,
+      },
+      participant: {
+        name: req.body.participant,
+        id: req.body.id,
+        avatar: req.body.avatar || null,
+      },
+    });
+
+    await newConversation.save();
+    return newConversation;
+  } catch (err) {
+    throw err;
+  }
+};
+
+module.exports.getMessages = async function (req) {
+  try {
+    const messages = await MessageModel.find({
+      conversation_id: req.params.conversation_id,
+    }).sort("-createdAt");
+
+    const { participant } = await ConversationModel.findById(
+      req.params.conversation_id
+    );
+
+    return {
+      data: {
+        messages: messages,
+        participant,
+      },
+      user: req.user.userid,
+      conversation_id: req.params.conversation_id,
+    };
+  } catch (err) {
+    throw err;
+  }
+};
+
+module.exports.sendMessage = async function (req) {
+  if (req.body.message || (req.files && req.files.length > 0)) {
+    try {
+      // save message text/attachment in database
+      let attachments = null;
+
+      if (req.files && req.files.length > 0) {
+        attachments = [];
+
+        req.files.forEach((file) => {
+          attachments.push(file.filename);
+        });
+      }
+
+      const newMessage = new MessageModel({
+        text: req.body.message,
+        attachment: attachments,
+        sender: {
+          id: req.users.id,
+          name: req.users.fullName,
+          avatar: req.user.avatar || null,
+        },
+        receiver: {
+          id: req.body.receiverId,
+          name: req.body.receiverName,
+          avatar: req.body.avatar || null,
+        },
+        conversation_id: req.body.conversationId,
+      });
+
+      const result = await newMessage.save();
+
+      // emit socket event
+      global.io.emit("new_message", {
+        message: {
+          conversation_id: req.body.conversationId,
+          sender: {
+            id: req.user.userid,
+            name: req.user.username,
+            avatar: req.user.avatar || null,
+          },
+          message: req.body.message,
+          attachment: attachments,
+          date_time: result.date_time,
+        },
+      });
+
+      return result;
+    } catch (err) {
+      throw err;
+    }
+  } else {
+    throw new Error("message text or attachment is required!");
+  }
 };

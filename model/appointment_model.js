@@ -2,26 +2,33 @@ const mongoose =require('mongoose');
 const db= require("../config/db");
 const { Schema } = mongoose;
 const appointmentSchema = new Schema({
-    type:{
+    doctor: { type: mongoose.Schema.ObjectId, ref: 'doctors' },
+      patientId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users',
+        required: true
+      },
+      date: {
         type: String,
-        // lowercase: true,//tất cả email được lưu trữ dưới dạng chữ thường trong CSDL
-        required: true,
-        unique: true
-    },
-    department:{
+        required: true
+      },
+      time: {
         type: String,
-        required:true
-    },
-    status: String,
-    patient_name: String,
-    doctor_name: String,
-    // password:{
-    //     type: String,
-    //     required: true,
+        required: true
+      },
+      type:{
+        type: String,
+        required: true
+      },
+      problem:{
+        type:String
+      },
+      status:{
+        type:String,
+        default:"Chưa xác nhận"
+      }
+    });
 
-    // },
-    
-});
 // const appointmentSchema = new Schema({
 //     doctorId: {
 //         type: mongoose.Schema.Types.ObjectId,

@@ -216,47 +216,47 @@
 							<table class="table table-striped custom-table">
 								<thead>
 									<tr>
-										<th>Type</th>
-										<th>Patient Name</th>
-										<th>Department</th>
-										<th>Doctor Name</th>
+										<th>Kiểu</th>
+										<th>Tên bệnh nhân</th>
+										<th>Chuyên khoa</th>
+										<th>Tên bác sĩ</th>
 										
-										<th>Appointment Date</th>
-										<th>Appointment Time</th>
-                                        <th>Patient Email</th>
-                                        <th>Patient Phone</th>
-										<th class="text-right">Action</th>
+										<th>Ngày</th>
+										<th>Giờ</th>
+                                        <th>Email bệnh nhân</th>
+                                        <th>Trạng thái</th>
+										<th class="text-right">Hành động</th>
 									</tr>
 								</thead>
 								<tbody>
                                     <% for (var i = 0; i < list.length; i++){ %>
 									<tr>
 										<td>
-                                            <% if (list[i].type == 'mess') { %>
+                                            <% if (list[i].type == 'chat') { %>
                                                 <span style="color: white; background-color: green; border-radius: 50px; padding: 10px;"><%= list[i].type %></span>
-                                            <% } else if (list[i].type == 'videocall') { %>
+                                            <% } else if (list[i].type == 'videoCall') { %>
                                                 <span style="color: white; background-color: rgb(96, 20, 20); border-radius: 50px; padding: 10px;"><%= list[i].type %></span>
-                                            <% } else if (list[i].type == 'voicechat') { %>
+                                            <% } else if (list[i].type == 'voiceChat') { %>
                                                 <span style="color: white; background-color: orange; border-radius: 50px; padding: 10px;"><%= list[i].type %></span>
                                             <% } %>
                                         </td>
 										
-										<td><%= list[i].patient_name %></td>
-										<td><%= list[i].department %></td>
-										<td><%= list[i].doctor_name %></td>
+										<td><%= list[i].patientId.fullName %></td>
+										<td><%= list[i].doctor.department.department_name %></td>
+										<td><%= list[i].doctor.userName %></td>
 										<td><%= list[i].date %></td>
                                         <td><%= list[i].time %></td>
-                                        <td><%= list[i].email %></td>
-                                        <td><%= list[i].phone %></td>
+                                        <td><%= list[i].patientId.email %></td>
+                                        <td><%= list[i].status %></td>
 										
 										<td class="text-right">
 											<div class="dropdown dropdown-action">
-												<a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
-												<div class="dropdown-menu dropdown-menu-right">
-													<a class="dropdown-item" href="/appointment/edit_appointment/<%= list[i].id %>"><i class="fa fa-pencil m-r-5"></i> Edit</a>
-													<a class="dropdown-item" href="/appointment/delete_appointment/<%= list[i].id %>"><i class="fa fa-trash-o m-r-5"></i> Delete</a>
-												</div>
-											</div>
+                                                <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                                                <div class="dropdown-menu dropdown-menu-right">
+                                                    <a class="dropdown-item" href="/appointment/confirm_appointment/<%= list[i].id %>"><i class="fa fa-check m-r-5"></i> Xác nhận</a>
+                                                    <a class="dropdown-item" href="/appointment/reject_appointment/<%= list[i].id %>"><i class="fa fa-times m-r-5"></i> Từ chối</a>
+                                                </div>
+                                            </div>
                                         </td>
                                         <% } %>
 									</tr>

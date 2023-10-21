@@ -25,10 +25,16 @@ const doctorSchema = new Schema({
     biography:{
         type:String,
     },
-    imgPath:String,
-    department:String,
+    avatar: {
+        type: String,
+      },
+    department: { type: mongoose.Schema.ObjectId, ref: 'departments' },
     
-});
+},
+{
+    timestamps: true
+  }
+);
 
 const DoctorModel= db.model('doctors',doctorSchema);
 module.exports=DoctorModel;

@@ -176,7 +176,7 @@
                             <ul style="display: none;">
                                 <!-- <li><a href="/compose">Compose Mail</a></li>
                                 <li><a href="/inbox">Inbox</a></li> -->
-                                <li><a href="/compose">chat</a></li>
+                                <li><a href="/messenger">chat</a></li>
                                 <li><a href="/inbox">videocall</a></li>
                                 <li><a href="/compose">voice chat</a></li>
                                 
@@ -290,16 +290,25 @@
                                             <% for (var i = 0; i < applist.length; i++){ %>
 											<tr>
 												<td style="min-width: 200px;">
-													<h5 class="time-title p-0">Patient Name</h5>
-													<p><%= applist[i].patient_name%></p>
+													<h5 class="time-title p-0">Tên bệnh nhân</h5>
+													<p><%= applist[i].patientId.fullName %></p>
 												</td>                 
 												<td>
-													<h5 class="time-title p-0">Appointment With</h5>
-													<p><%= applist[i].doctor_name%></p>
+													<h5 class="time-title p-0">Kiểu cuộc họp</h5>
+													<p><%= applist[i].type%></p>
+												</td>
+
+                                                <td>
+													<h5 class="time-title p-0">Ngày</h5>
+													<p><%= applist[i].date%></p>
 												</td>
 												<td>
-													<h5 class="time-title p-0">Timing</h5>
+													<h5 class="time-title p-0">Giờ</h5>
 													<p><%= applist[i].time%></p>
+												</td>
+                                                <td>
+													<h5 class="time-title p-0">Trạng thái</h5>
+													<p><%= applist[i].status%></p>
 												</td>
 												<td class="text-right">
 													<a href="/appointment" class="btn btn-outline-primary take-btn">Take up</a>
@@ -679,6 +688,7 @@
         </div>
     </div>
     <div class="sidebar-overlay" data-reff=""></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="/assets/js/jquery-3.2.1.min.js"></script>
 	<script src="/assets/js/popper.min.js"></script>
     <script src="/assets/js/bootstrap.min.js"></script>

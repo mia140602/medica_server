@@ -10,11 +10,18 @@ router.get('*', function(req, res, next){
 	}
 });
 
-router.get('/',function(req,res){
-    db.getcomplain(function(err,result){
-        res.render('inbox.ejs',{list :result});
-    })
+router.get('/',async function(req,res){
+    try {
+        const result= await db.getcomplain();
+		const data = await db.getInbox(req);
+        res.render('inbox.ejs',{list :result, data: data});
+    } catch(err) {
+        console.error(err);
+        res.status(500).send(err);
+    }
+	
 });
+
 
 
 
