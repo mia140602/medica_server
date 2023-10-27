@@ -131,17 +131,6 @@ router.post('/profile',function(req,res){
 
     }) ;
 });
-router.get('/conversations', async function(req, res) {
-    try {
-        var username = req.cookies['username'] || 'Guest';
-        var doctor = await db.getdoctordetails(username);
-        req.user = doctor; // Set req.user to the current doctor
-        var conversations = await db.getInbox(req);
-        res.render('inbox.ejs', { list: conversations });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send();
-    }
-});
+
 
 module.exports =router;

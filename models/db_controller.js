@@ -1,13 +1,15 @@
 // var mysql = require("mysql");
 var mongoose = require('mongoose');
 var ObjectId = mongoose.Types.ObjectId;
+const moment = require('moment-timezone');
 
 var DoctorModel = require("../model/doctor_model");
 var AppointmentModel=require("../model/appointment_model")
 var DepartmentModel= require("../model/department_model")
 var ComplainModel= require("../model/complain_model")
 var UserModel= require('../model/user_model');
-// var MessageModel= require('../model/message-model');
+var ConversationModel= require('../model/conversation_model');
+var MessageModel=require('../model/messager_model')
 var ConversationModel= require('../model/conversation_model')
 
 var express = require("express");
@@ -288,73 +290,8 @@ module.exports.deletemed = function (id, callback) {
   con.query(query, callback);
 };
 
-
-
-module.exports.postcomplain = async function (
-  message,
-  name,
-  email,
-  subject
-) {
-  try {
-    const complain = new ComplainModel({
-      message: message,
-      name: name,
-      email: email,
-      subject: subject
-    });
-    const result = await complain.save();
-    return result;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-};
-
-module.exports.getcomplain = async function () {
-  try {
-    // const complains = await ComplainModel.find({});
-    const complains = await DoctorModel.find({});
-    return complains;
-  } catch (err) {
-    console.error(err);
-    throw err;
-  }
-};
-
-// module.exports.add_appointment = function (
-//   p_name,
-//   department,
-//   d_name,
-//   date,
-//   time,
-//   email,
-//   phone,
-//   callback
-// ) {
-//   var query =
-//     "insert into appointment (patient_name,department,doctor_name,date,time,email,phone) values ('" +
-//     p_name +
-//     "','" +
-//     department +
-//     "','" +
-//     d_name +
-//     "','" +
-//     date +
-//     "','" +
-//     time +
-//     "','" +
-//     email +
-//     "','" +
-//     phone +
-//     "')";
-//   con.query(query, callback);
-// };
-
-
-
 // appointment
-// Trong db_controller.js
+
  module.exports.getdoctorappointment= async function (doctorUsername) {
   try {
     const doctor = await DoctorModel.findOne({ userName: doctorUsername });
@@ -363,6 +300,7 @@ module.exports.getcomplain = async function () {
       return [];
     }
     const appointments = await AppointmentModel.find({ doctor: doctor._id })
+    .sort({ createdAt: -1 })
     .populate('patientId')
     .populate({
       path: 'doctor',
@@ -384,6 +322,57 @@ module.exports.getallappointment = async function () {
     throw err;
   }
 };
+
+module.exports.acceptAppointment = async function (appointmentId){
+  // Lấy thông tin lịch hẹn
+  const appointment = await AppointmentModel.findById(appointmentId);
+
+  // Kiểm tra xem lịch hẹn đã được xác nhận hay từ chối chưa
+  if (appointment.status !== 'Chưa xác nhận') {
+    throw new Error('Lịch hẹn đã được xử lý');
+}
+
+  // Cập nhật trạng thái lịch hẹn
+  appointment.status = 'Xác nhận';
+  await appointment.save();
+
+  // Nếu lịch hẹn là loại "chat", tạo một cuộc trò chuyện mới
+  if (appointment.type === 'chat') {
+    const startTime = moment(appointment.date + ' ' + appointment.time, 'YYYY-MM-DD h:mm A', 'Asia/Ho_Chi_Minh').toDate();
+    const endTime = moment(startTime).add(30, 'minutes').toDate();
+
+    const conversation = new ConversationModel({
+      user: appointment.patientId,
+      doctor: appointment.doctor,
+      appointment: appointmentId,
+      startTime: startTime,
+      endTime: endTime,
+    });
+    await conversation.save();
+  }
+
+  return appointment;
+};
+
+
+module.exports.rejectAppointment = async function (appointmentId){
+  // Lấy thông tin lịch hẹn
+  const appointment = await AppointmentModel.findById(appointmentId)
+  .populate('doctor')
+  ;
+
+  // Kiểm tra xem lịch hẹn đã được xử lý chưa
+  if (appointment.status !== 'Chưa xác nhận') {
+      throw new Error('Lịch hẹn đã được xử lý');
+  }
+
+  // Cập nhật trạng thái lịch hẹn
+  appointment.status = 'Từ chối';
+  await appointment.save();
+
+  return appointment;
+};
+
 module.exports.add_appointment = async function (
   p_name,
   department,
@@ -475,6 +464,37 @@ module.exports.deleteappointment = async function (id) {
 };
 //module.exports =router;
 
+
+//conversations
+module.exports.getdoctorconversations= async function (doctorUsername) {
+  try {
+    const doctor = await DoctorModel.findOne({ userName: doctorUsername });
+    if (!doctor) {
+      console.error(`No doctor found with username: ${doctorUsername}`);
+      return [];
+    }
+    const conversations = await ConversationModel.find({ doctor: doctor._id })
+    .populate('user')
+    .populate({
+      path: 'appointment',
+      match: { status: 'Xác nhận' } 
+    })
+    // .populate({
+    //   path: 'doctor',
+    //   populate: { path: 'department' }
+    // })
+    ;
+    return conversations;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
+
+
+
+
+
 module.exports.findOne = function (email, callback) {
   var query = "select *from users where email='" + email + "'";
   con.query(query, callback);
@@ -559,10 +579,6 @@ module.exports.addMed = function (
   con.query(query, callback);
 };
 
-module.exports.getMedbyId = function (id, callback) {
-  var query = "select * from store where id=" + id;
-  con.query(query, callback);
-};
 
 module.exports.editmed = function (
   id,
@@ -593,11 +609,6 @@ module.exports.editmed = function (
   con.query(query, callback);
 };
 
-module.exports.getallmed = function (callback) {
-  var query = "select *from store order by id desc";
-  console.log(query);
-  con.query(query, callback);
-};
 
 module.exports.getAllemployee = function (callback) {
   var query = "select * from employee";
@@ -823,7 +834,7 @@ module.exports.addConversation = async function (req) {
 
 module.exports.getMessages = async function (req) {
   try {
-    const messages = await MessageModel.find({
+    const messages = await ConversationModel.find({
       conversation_id: req.params.conversation_id,
     }).sort("-createdAt");
 
@@ -843,6 +854,28 @@ module.exports.getMessages = async function (req) {
     throw err;
   }
 };
+// 
+module.exports.getMessagesForConversation = async function(conversationId) {
+  try {
+      const messages = await MessageModel.find({ chat: conversationId })
+      
+      .populate({
+        path: 'chat',
+        model: 'conversations',
+        populate: [
+          { path: 'user', model: 'users' },
+          // { path: 'doctor', model: 'doctors' }
+        ]
+      });
+      
+      ;
+      return messages;
+  } catch (err) {
+      console.error("Error in getMessagesForConversation:", err);
+      throw err; 
+  }
+};
+
 
 module.exports.sendMessage = async function (req) {
   if (req.body.message || (req.files && req.files.length > 0)) {

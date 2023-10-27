@@ -27,7 +27,7 @@ const appointmentSchema = new Schema({
         type:String,
         default:"Chưa xác nhận"
       }
-    });
+    },{timestamps: true});
 
 // const appointmentSchema = new Schema({
 //     doctorId: {

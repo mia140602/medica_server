@@ -16,6 +16,23 @@
 		<script src="/assets/js/html5shiv.min.js"></script>
 		<script src="/assets/js/respond.min.js"></script>
 	<![endif]-->
+    <style>
+        /* (Thêm CSS ở đây để tạo ra cùng một kiểu dáng và màu sắc như chat_page.dart) */
+        .chat-message {
+            max-width: 30%;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        .you-message {
+            background-color: #0b93f6;
+            color: white;
+            align-self: flex-end;
+        }
+        .other-message {
+            background-color: #e5e5ea;
+        }
+    </style>
 </head>
 
 <body>
@@ -25,7 +42,7 @@
         <div class="header">
 			<div class="header-left">
 				<a href="/home" class="logo">
-					<img src="/assets/img/logo.png" width="35" height="35" alt=""> <span>Preclinic</span>
+					<img src="/assets/img/logo-dark.png" width="35" height="35" alt=""> <span>Medical</span>
 				</a>
 			</div>
 			<a id="toggle_btn" href="javascript:void(0);"><i class="fa fa-bars"></i></a>
@@ -172,10 +189,14 @@
                        
                         
                         <li class="submenu">
-                            <a href="#"><i class="fa fa-envelope"></i> <span> Email</span> <span class="menu-arrow"></span></a>
+                            <a href="#"><i class="fa fa-handshake-o"></i> <span> Meeting romm</span> <span class="menu-arrow"></span></a>
                             <ul style="display: none;">
-                                <li><a href="/compose">Compose Mail</a></li>
-                                <li><a href="/inbox">Inbox</a></li>
+                                <!-- <li><a href="/compose">Compose Mail</a></li>
+                                <li><a href="/inbox">Inbox</a></li> -->
+                                <li><a href="/conversation">chat</a></li>
+                                <li><a href="/inbox">videocall</a></li>
+                                <li><a href="/compose">voice chat</a></li>
+                                
                                 
                             </ul>
                         </li>
@@ -199,53 +220,43 @@
         <div class="page-wrapper">
             <div class="content">
                 <div class="row">
-                    <div class="col-sm-5 col-5">
-                        <h4 class="page-title">Departments</h4>
+                    <div class="col-sm-4 col-3">
+                        <h4 class="page-title">Room chat with <%= detail.user.fullName %> </h4>
                     </div>
-                    <div class="col-sm-7 col-7 text-right m-b-30">
-                        <a href="add-department.html" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Add Department</a>
-                    </div>
+                    
                 </div>
                 <div class="row">
                     <div class="col-md-12">
-                        <div class="table-responsive">
-                            <table class="table table-striped custom-table mb-0 datatable">
-                                <thead>
-                                    <tr>
-                                        <th>complain id</th>
-                                        <th>Name</th>
-                                        <th>Message</th>
-                                        <th>email</th>
-                                        <th class="text-right">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <% for (var i = 0; i < list.length; i++){ %>
-                                    
-                                    
-                                   
-                                    <tr>
-                                        <td><%= list[i].id %></td>
-                                        <td><%= list[i].name %></td>
-                                        <td><%= list[i].message %></td>
-                                        <td><%= list[i].email %></td>
-                                        <td class="text-right">
-                                            <div class="dropdown dropdown-action">
-                                                <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
-                                                <div class="dropdown-menu dropdown-menu-right">
-                                                    <a class="dropdown-item" href="edit-department.html"><i class="fa fa-pencil m-r-5"></i> Edit</a>
-                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#delete_department"><i class="fa fa-trash-o m-r-5"></i> Delete</a>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="chat-window">
+                                    <!-- Danh sách tin nhắn -->
+                                    <div class="chat-contents d-flex flex-column">
+                                        <% for (var i = 0; i < list.length; i++){ %>
+                                            <div class="chat-message <%= list[i].onModelSender === 'doctors' ? 'you-message' : 'other-message' %>">
+                                                <p><%= list[i].content %></p>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                    <!-- Khung nhập liệu -->
+                                    <div class="chat-footer">
+                                        <form action="/inbox/sendMessage" method="POST">
+                                            <input type="hidden" name="senderId" value="<%= detail.doctor._id %>">
+                                            <input type="hidden" name="receiverId" value="<%= detail.user._id %>">
+                                            <input type="hidden" name="conversationId" value="<%= detail._id %>">
+                                            <div class="input-group">
+                                                <input type="text" name="message" class="form-control" placeholder="Nhập tin nhắn...">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-primary" type="submit">Gửi</button>
                                                 </div>
                                             </div>
-                                        </td>
-                                        <% } %>
-                                    </tr>
-                                    
-                                </tbody>
-                            </table>
+                                        </form>
+                                        
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
             </div>
             <div class="notification-box">
                 <div class="msg-sidebar notifications msg-noti">
@@ -457,206 +468,32 @@
                 </div>
             </div>
         </div>
-        <div id="chat-container">
-            <div id="search-container">
-              <input type="text" placeholder="Search" />
-            </div>
-            <div id="conversation-list">
-              <% data.forEach(function(conversation) { %>
-                <!-- conversation creator is same to logged in user, so we need to show participant name and avatar -->
-                <% if(conversation.creator.id == loggedInUser.userid) { %>
-                  <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.participant.name %>')">
-                    <% if (conversation.participant.avatar) { %>
-                    <img src="./uploads/avatars/<%= conversation.participant.avatar %>" alt="<%= conversation.participant.name %>" />
-                    <% } else { %>
-                      <img src="./images/nophoto.png" />
-                    <% } %>
-                    <div class="title-text"><%= conversation.participant.name %></div>
-                    <div class="conversation-date"><%= moment(conversation.last_updated).fromNow() %></div>
-                  </div>
-                <% } else { %>
-                  <div class="conversation" onclick="getMessages('<%= conversation._id %>', '<%= conversation.creator.name %>')">
-                    <% if (conversation.creator.avatar) { %>
-                    <img src="./uploads/avatars/<%= conversation.creator.avatar %>" alt="<%= conversation.creator.name %>" />
-                    <% } else { %>
-                      <img src="./images/nophoto.png" />
-                    <% } %>
-                    <div class="title-text"><%= conversation.creator.name %></div>
-                    <div class="conversation-date"><%= moment(conversation.last_updated).fromNow() %></div>
-                  </div>
-                <% } %>
-              <% }); %>
-              
-              <!-- show no conversation placeholder image for 0 conversations -->
-              <% if(data && data.length === 0) { %>
-                <div class="nothing"><img src="./images/no-conversation.svg"></div>
-              <% } %>
-            </div>
-      
-            <div class="new-message-container" onclick="openModal()">
-              <a href="#">+</a>
-            </div>
-      
-            <div id="chat-title">
-              <span id="conversation-partner"></span>
-              <img src="./images/trash.png" alt="Delete Conversation" />
-            </div>
-      
-            <!-- placeholder div if no messages are in messages area -->
-            <div id="chat-message-list">
-              <div class="nothing">select a conversation</div>
-            </div>
-      
-            <!-- send message form -->
-            <form id="chat-form" method="post" enctype="multipart/form-data">
-              <label for="attachment"><img src="./images/attachment.png" alt="Add Attachment" /></label>
-              <input type="file" multiple name="attachment" class="hide" id="attachment" />
-              <input type="text" name="message" placeholder="Type a message" autocomplete="off" />
-            </form>
-      
-          </div>
-          <%- include('./aditional/add-conversation-modal.ejs'); %>
-      
-          <!-- import socket io client from cdn -->
-          <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.1/socket.io.min.js"></script>
-      
-          <script>
-            const form = document.querySelector('#chat-form');
-            const messageContainer = document.querySelector('#chat-message-list');
-            const chatTitleContainer = document.querySelector('#conversation-partner');
-            const loggedinUserId = '<%= loggedInUser.userid %>';
-            const loggedinUserName = '<%= loggedInUser.username %>';
-            let participant = null; // selected conversation participant object
-            let current_conversation_id; // selected conversation id
-            // socket initialization
-            const socket = io('<%= process.env.APP_URL %>');
-            // handle new/live incoming message from socket
-            socket.on("new_message", data => {
-              // only respond if current conversation is open in any client
-              if(data.message.conversation_id == current_conversation_id) {
-                // message class
-                const messageClass = data.message.sender.id === loggedinUserId ? 'you-message' : 'other-message';
-                
-                const senderAvatar = data.message.sender.avatar ? `<img src="./uploads/avatars/${data.message.sender.avatar}" alt="${data.message.sender.name}" />` : `<img src="./images/nophoto.png" alt="${data.message.sender.name}" />`;
-                // message attachments
-                let attachments = '<div class="attachments">';
-                if(data.message.attachment && data.message.attachment.length > 0) {
-                  data.message.attachment.forEach(attachment => {
-                    attachments += `<img src="./uploads/attachments/${attachment}" /> `;
-                  });
-                }
-                attachments += '</div>';
-                let messageHTML;
-                // do not show avatar for loggedin user
-                if(data.message.sender.id == loggedinUserId) {
-                  messageHTML = `<div class="message-row ${messageClass}"><div class="message-content">
-                    <div class="message-text">${data.message.message}</div>
-                    ${attachments}
-                    <div class="message-time">${moment(data.message.date_time).fromNow()}</div>
-                  </div></div>`;
-                } else {
-                  messageHTML = `<div class="message-row ${messageClass}"><div class="message-content">
-                    ${senderAvatar}
-                    <div class="message-text">${data.message.message}</div>
-                    ${attachments}
-                    <div class="message-time">${moment(data.message.date_time).fromNow()}</div>
-                  </div></div>`;
-                }
-                // append the inoming message to message area as last item
-                document.querySelector('#chat-message-list > .message-row:first-child').insertAdjacentHTML('beforeBegin', messageHTML);
-              }
-            });
-            // get messages of a conversation
-            async function getMessages(conversation_id, current_conversation_name){
-              // messages failure toast
-              const messagesFailureToast = Toastify({
-                text: "Error loading messages!",
-                duration: 1000,
-              });
-              let response = await fetch(`/inbox/messages/${conversation_id}`);
-              const result= await response.json();
-              if(!result.errors && result.data) {
-                  form.style.visibility = 'visible';
-                  
-                  const {data, user, conversation_id} = result;
-                  participant = data.participant;
-                  current_conversation_id = conversation_id;
-                  if(data.messages) {
-                    let allMessages = '';
-                    if(data.messages.length > 0) {
-                      data.messages.forEach((message) => {
-                        let senderAvatar = message.sender.avatar ? `./uploads/avatars/${message.sender.avatar}` : './images/nophoto.png';
-                        const messageClass = message.sender.id === loggedinUserId ? 'you-message' : 'other-message';
-                        const showAvatar = message.sender.id === loggedinUserId ? '' : `<img src="${senderAvatar}" alt="${message.sender.name}" />`;
-                        // message attachments
-                        let attachments = '<div class="attachments">';
-                        if(message.attachment && message.attachment.length > 0) {
-                          message.attachment.forEach(attachment => {
-                            attachments += `<img src="./uploads/attachments/${attachment}" /> `;
-                          });
-                        }
-                        attachments += '</div>';
-                        // final message html
-                        let messageHTML = `<div class="message-row ${messageClass}"><div class="message-content">
-                            ${showAvatar}
-                            <div class="message-text">${message.text}</div>
-                            ${attachments}
-                            <div class="message-time">${moment(message.date_time).fromNow()}</div>
-                          </div></div>`;
-                        allMessages += messageHTML;
-                        messageContainer.innerHTML = allMessages;
-                      });
-                    } else if(data.messages.length === 0) {
-                      messageContainer.innerHTML = '<div class="message-row"></div>';
-                    }
-                    chatTitleContainer.textContent = current_conversation_name;
-                  }
-              } else {
-                messagesFailureToast.showToast();
-              }
-          }
-            // message sending
-            form.onsubmit = async function (event) {
-              event.preventDefault();
-              const sendMessageFailureToast = Toastify({
-                text: "Error sending message",
-                duration: 1000,
-              });
-              // prepare the form data
-              const formData = new FormData(form);
-              formData.append('receiverId', participant.id);
-              formData.append('receiverName', participant.name);
-              formData.append('avatar', participant.avatar || '');
-              formData.append('conversationId', current_conversation_id);
-              // send the request to server
-              let response = await fetch("/inbox/message", {
-                method: "POST",
-                body: formData,
-              });
-              // get response
-              let result = await response.json();
-              if (!result.errors) {
-                form.reset(); // reset the form
-              } else {
-                sendMessageFailureToast.showToast();
-              }
-            }
-            </script>
-		<div id="delete_department" class="modal fade delete-modal" role="dialog">
-			<div class="modal-dialog modal-dialog-centered">
-				<div class="modal-content">
-					<div class="modal-body text-center">
-						<img src="assets/img/sent.png" alt="" width="50" height="46">
-						<h3>Are you sure want to delete this Department?</h3>
-						<div class="m-t-20"> <a href="#" class="btn btn-white" data-dismiss="modal">Close</a>
-							<button type="submit" class="btn btn-danger">Delete</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-    </div>
+        
     <div class="sidebar-overlay" data-reff=""></div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var socket = io();
+        socket.on('connect', function() {
+            socket.emit('setup', '<%= detail.doctor %>'); 
+        });
+        $('form').on('submit', function(e) {
+            e.preventDefault();
+            var messageContent = $('input[name="message"]').val();
+            socket.emit('new message', {
+                content: messageContent,
+                chat: '<%= detail._id %>', 
+                sender: '<%= detail.doctor._id %>',
+                receiver: '<%= detail.user._id %>',
+                onModelSender: 'doctors',
+                onModelReceiver: 'users'
+            });
+            $('input[name="message"]').val('');
+
+        });
+        socket.on('new_message', function(newMessage) {
+            $('.chat-contents').append('<div class="chat-message ' + (newMessage.sender == '<%= detail.doctor %>' ? 'you-message' : 'other-message') + '"><p>' + newMessage.content + '</p></div>');
+        });
+    </script>
     <script src="assets/js/jquery-3.2.1.min.js"></script>
 	<script src="assets/js/popper.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
@@ -664,6 +501,8 @@
     <script src="assets/js/dataTables.bootstrap4.min.js"></script>
     <script src="assets/js/jquery.slimscroll.js"></script>
     <script src="assets/js/app.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 

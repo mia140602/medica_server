@@ -59,5 +59,30 @@ router.get('/doctorAppointment', async (req, res) => {
       res.status(400).json({ message: error.message });
     }
   });
+// GET /api/appointments
+router.get('/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
 
+    if (!userId) {
+      return res.status(400).json("Không tồn tại userId");
+    }
+
+    const appointments = await AppointmentModel.find({
+      patientId: new mongoose.Types.ObjectId(userId),
+    }).populate({
+      path: 'doctor',
+      select: 'userName avatar department',
+      populate: {
+        path: 'department',
+        select: 'department_name'
+      }
+    });
+
+    res.json(appointments);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;

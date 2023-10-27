@@ -46,27 +46,73 @@ io.on("connection",(socket)=> {
         console.log("User Joined:"+room);
         
     });
-    socket.on('new message',(newMessageReceived)=>{
-        var chat= newMessageReceived.chat;
-        var room= chat._id;
-        var sender= newMessageReceived.sender;
 
-        if(!sender){
-            console.log("Không có người dùng nào");
-            return;
-        }
-        var senderId= sender._id;
-        console.log(senderId+"message sender");
+    socket.on('new message', async (newMessageReceived) => {
+        var chat = newMessageReceived.chat;
+        var sender = newMessageReceived.sender;
+        var receiver = newMessageReceived.receiver;
+        var onModelSender = newMessageReceived.onModelSender;
+        var onModelReceiver = newMessageReceived.onModelReceiver;
+      
+        // Lưu tin nhắn mới vào cơ sở dữ liệu
+        const newMessage = new MessageModel({
+          content: newMessageReceived.content,
+          chat: chat,
+          sender: sender,
+          receiver: receiver,
+          onModelSender: onModelSender,
+          onModelReceiver: onModelReceiver
+        });
+        await newMessage.save();
+      
+        // Cập nhật cuộc trò chuyện với tin nhắn mới nhất
+        await ConversationModel.findByIdAndUpdate(chat, { latestMessage: newMessage._id });
+      
+        // Phát sự kiện 'new_message' để thông báo cho các client khác
+        io.to(chat).emit('new_message', newMessage); // Gửi toàn bộ tin nhắn mới
+      });
 
-        const users=chat.users;
-        if(!users){
-            console.log("Không có người dùng nào");
-            return;
-        }
-        socket.to(room).emit("message received",newMessageReceived);
-        socket.to(room).emit('message sent', "New Message");
-        
-    });
+    
+    // socket.on('new message', async (newMessageReceived) => {
+    //     var chat = newMessageReceived.chat;
+    //     var room = chat._id;
+    //     var sender = newMessageReceived.sender;
+    
+    //     if (!sender) {
+    //         console.log("Không có người dùng nào");
+    //         return;
+    //     }
+    //     var senderId = sender._id;
+    //     console.log(senderId + "message sender");
+    
+    //     const users = chat.users;
+    //     if (!users) {
+    //         console.log("Không có người dùng nào");
+    //         return;
+    //     }
+    
+    //     // Lưu tin nhắn mới vào cơ sở dữ liệu
+    //     const newMessage = new MessageModel({
+    //         content: newMessageReceived.content,
+    //         chat: room,
+    //         sender: senderId,
+    //         // Thêm các thông tin khác về tin nhắn tại đây
+    //     });
+    //     await newMessage.save();
+    
+    //     // Cập nhật cuộc trò chuyện với tin nhắn mới nhất
+    //     await ConversationModel.findByIdAndUpdate(room, { latestMessage: newMessage._id });
+    
+    //     // Phát sự kiện 'new_message' để thông báo cho các client khác
+    //     io.to(room).emit('new_message', {
+    //         chatId: room,
+    //         content: newMessage.content,
+    //         // Thêm các thông tin khác về tin nhắn tại đây
+    //     });
+    
+    //     socket.to(room).emit("message received", newMessageReceived);
+    //     socket.to(room).emit('message sent', "New Message");
+    // });
 
     socket.off('setup',()=>{
         console.log("Người dùng không online");

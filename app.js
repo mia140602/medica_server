@@ -56,6 +56,7 @@ var appointment = require ('./controllers/appointment');
 var receipt = require ('./controllers/receipt');
 
 var messenger= require('./controllers/messenger')
+var conversation= require('./controllers/conversation')
 
 
 const { Socket } = require('socket.io');
@@ -96,7 +97,10 @@ app.use ('/inbox',inbox);
 app.use ('/appointment',appointment);
 app.use('/receipt',receipt);
 
-app.use('/messenger',messenger)
+app.use('/messenger',messenger);
+app.use('/conversation',conversation);
+
+
 
 // app.use('/doctors/add_doctor',add_doc);
 
@@ -116,5 +120,8 @@ app.use('/api/appointments',appointmentRouter);
 
 const departmentRouter= require('./routers/department_router');
 app.use('/api/departments',departmentRouter);
+
+const notificationRouter = require('./routers/notification_router');
+app.use('/notification',notificationRouter);
 
 module.exports=app;

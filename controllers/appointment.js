@@ -1,7 +1,7 @@
 var express = require ('express');
 var router = express.Router();
 var db = require.main.require ('./models/db_controller');
-var AppointmentModel= require('../model/appointment_model');
+var Notification= require('../model/notification_model');
 var bodyPaser = require ('body-parser');
 
 router.get('*', function(req, res, next){
@@ -16,6 +16,7 @@ router.get('/', async function(req, res) {
     try {
         var username = req.cookies['username'];
       var appointments = await db.getdoctorappointment(username);
+      appointments.sort((a, b) => b.created_at - a.created_at);
       var doctor = await db.getdoctordetails(username);
       res.render('appointment.ejs', { list: appointments ,doctor: doctor});
     } catch (err) {
@@ -23,26 +24,39 @@ router.get('/', async function(req, res) {
       res.status(500).send();
     }
   });
-  router.get('/accept_appointment/:id', async function(req, res) {
+  router.get('/acceptAppointment/:id', async function(req, res) {
     try {
         var id = req.params.id;
-        await AppointmentModel.updateOne({ _id: id }, { status: 'Accepted' });
+        await db.acceptAppointment(id);
+        res.redirect('/appointment');
+    } catch (err) {
+        // Nếu lịch hẹn đã được xử lý, hiển thị thông báo lỗi
+        if (err.message === 'Lịch hẹn đã được xử lý') {
+            res.render('appointment', { errorMessage: err.message });
+        } else {
+            console.error(err);
+            res.status(500).send();
+        }
+    }
+});
+
+  router.get('/rejectAppointment/:id', async function(req, res) {
+    try {
+        var id = req.params.id;
+        const appointment = await db.rejectAppointment(id);
+        // Tạo thông báo
+        const notification = new Notification({
+            userId: appointment.patientId,
+            message: `Bác sĩ ${appointment.doctor.userName} đã từ chối lịch hẹn ${appointment.type} lúc ${appointment.time} ngày ${appointment.date} của bạn`
+        });
+        await notification.save();
         res.redirect('/appointment');
     } catch (err) {
         console.error(err);
         res.status(500).send();
     }
 });
-router.get('/reject_appointment/:id', async function(req, res) {
-    try {
-        var id = req.params.id;
-        await AppointmentModel.updateOne({ _id: id }, { status: 'Rejected' });
-        res.redirect('/appointment');
-    } catch (err) {
-        console.error(err);
-        res.status(500).send();
-    }
-});
+
 
 router.get('/add_appointment',function(req,res){
     res.render('add_appointment.ejs');

@@ -8,9 +8,9 @@ const { verifyAndAuthorization, verifytoken } = require("../middleware/verifyTok
 
 
 //create message
-router.post('/userSendMessage',verifyAndAuthorization,MessageController.sendMesssage);
+router.post('/userSendMessage',verifyAndAuthorization, MessageController.sendMesssage);
 //get all message
-router.get('/userMessage/:id',verifytoken,MessageController.getAllMessage);
+router.get('/messages/:appointmentId',  MessageController.getMessagesByAppointmentId);
 //auth
 router.post("/registration",UserController.register);
 router.post('/userLogin',UserController.login);
