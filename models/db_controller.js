@@ -11,8 +11,11 @@ var UserModel= require('../model/user_model');
 var ConversationModel= require('../model/conversation_model');
 var MessageModel=require('../model/messager_model')
 var ConversationModel= require('../model/conversation_model')
+var MeetingModel= require('../model/meeting_model')
+
 
 var express = require("express");
+const { meeting } = require('../zoomhelper');
 
 var router = express.Router();
 
@@ -350,6 +353,19 @@ module.exports.acceptAppointment = async function (appointmentId){
     });
     await conversation.save();
   }
+   // Nếu lịch hẹn là loại "videoCall" hoặc "voiceCall", tạo một cuộc họp mới
+   if (['videoCall', 'voiceCall'].includes(appointment.type)) {
+    const startTime = moment(appointment.date + ' ' + appointment.time, 'YYYY-MM-DD h:mm A', 'Asia/Ho_Chi_Minh').toDate();
+    const endTime = moment(startTime).add(30, 'minutes').toDate();
+    const ZoomMeeting= await meeting(appointment.doctor, appointment.patientId, appointmentId, appointment.type, startTime, endTime)
+    // const zoomMeeting = await zoomhelper.createZoomMeeting(appointment.doctor, appointment.patientId, appointmentId, appointment.type, startTime, endTime);
+    console.log("Zoom meeting: "+ ZoomMeeting);
+    // const meeting = await MeetingModel.createMeeting(appointment.doctor, appointment.patientId, appointmentId, appointment.type, startTime, endTime);
+    // console.log("meeting: "+ meeting);
+  }
+  
+
+  
 
   return appointment;
 };
@@ -490,6 +506,75 @@ module.exports.getdoctorconversations= async function (doctorUsername) {
     return [];
   }
 };
+
+
+//meetingvideo
+module.exports.getdoctormeetingvideo= async function (doctorUsername) {
+  try {
+    const doctor = await DoctorModel.findOne({ userName: doctorUsername });
+    if (!doctor) {
+      console.error(`No doctor found with username: ${doctorUsername}`);
+      return [];
+    }
+    const meetingVideo = await MeetingModel.find({ doctor: doctor._id , type:"videoCall"})
+    .populate('user')
+    .populate({
+      path: 'appointment',
+      match: { status: 'Xác nhận' } 
+    })
+    // .populate({
+    //   path: 'doctor',
+    //   populate: { path: 'department' }
+    // })
+    ;
+    return meetingVideo;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
+
+module.exports.getdoctormeetingvoice= async function (doctorUsername) {
+  try {
+    const doctor = await DoctorModel.findOne({ userName: doctorUsername });
+    if (!doctor) {
+      console.error(`No doctor found with username: ${doctorUsername}`);
+      return [];
+    }
+    const meetingVideo = await MeetingModel.find({ doctor: doctor._id , type:"voiceCall"})
+    .populate('user')
+    .populate({
+      path: 'appointment',
+      match: { status: 'Xác nhận' } 
+    })
+    // .populate({
+    //   path: 'doctor',
+    //   populate: { path: 'department' }
+    // })
+    ;
+    return meetingVideo;
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+};
+
+
+module.exports.getMeetingById= async function (meetingId){
+  try {
+    const meeting = await MeetingModel.findById(meetingId);
+
+    if (!meeting) {
+      console.error(`Không tìm thấy meeting nào bằng id: ${meetingId}`);
+      return [];
+    }
+    return meeting;
+  } catch (error) {
+    console.log(error);
+    return [];
+    
+  }
+}
 
 
 

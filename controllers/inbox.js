@@ -34,7 +34,14 @@ router.get('/:id', async function(req, res) {
                                 ;
         
         const messages = await db.getMessagesForConversation(conversationId);
-        res.render('inbox.ejs', { list: messages , detail: conversation});
+        const now = new Date();
+        if (now < conversation.startTime || now > conversation.endTime) {
+            res.status(403).send('Bạn không thể tham gia cuộc họp vào thời điểm này.');
+        } else {
+            res.render('inbox.ejs', { list: messages , detail: conversation});
+        }
+
+        
     } catch(err) {
         console.error(err);
         res.status(500).send(err);

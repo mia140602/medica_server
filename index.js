@@ -3,6 +3,7 @@ const db= require('./config/db')
 const UserModel=require('./model/user_model')
 var http= require('http');
 const cors= require('cors');
+const { initMeetingServer } = require('./utils/meeting-server');
 var server= http.createServer(app);
 var io= require('socket.io')(server,{
     pingTimeout:60000,
@@ -13,13 +14,17 @@ var io= require('socket.io')(server,{
     }
 })
 
+
+
 const port =3000;
 
 app.get('/',(req,res)=> {
     res.send("hello World");
 })
 io.on("connection",(socket)=> {
-    
+    const socketId= socket.id;
+    const meetingId = socket.handshake.query.id;
+    initMeetingServer(meetingId, socket, io);
     console.log("Connected");
     console.log(socket.id,"has joined");
     socket.on("/test",(msg)=>{
@@ -129,3 +134,7 @@ server.listen(port,"0.0.0.0", ()=>{
     console.log(`Server Listening on Port http://localhost:${port}`);
 });
 
+
+
+//check time appointment
+require('./check_end_time');

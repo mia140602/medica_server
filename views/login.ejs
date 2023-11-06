@@ -4,9 +4,16 @@
 	
 	<head>
 		<meta charset="utf-8">
-		<title>Login Form </title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+		<link rel="shortcut icon" type="image/x-icon" href="assets/img/logo-dark.png">
+		<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="assets/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="assets/css/style.css">
+		<title>Medica</title>
 		<style>
 		.login-form {
+			display: block;
+		
 			width: 300px;
 			margin: 0 auto;
 			font-family: Tahoma, Geneva, sans-serif;
@@ -38,31 +45,52 @@
 		</style>
 	</head>
 	<body>
-		<div class="login-form">
-			<h1>Login Form</h1>
-			<form action="" method="POST">
-				<input type="text" name="username" placeholder="Username" >
-				<input type="password" name="password" placeholder="Password" >
-				<input type="submit" value="Log In" onclick="click()">
-				<script>
-					function click(){
-						swal ("You are logged in");
-					}
-				</script>
-				<br>
-				<div>
-					<a href="/signup">Sign Up</a>
-					<br>
-					<br>
-					<a href="http://localhost:3000/resetpassword">Forget Password</a>
+		<div class="main-wrapper  account-wrapper">
+			<div class="account-page">
+				<div class="account-center">
+					<div class="account-box">
+						<div class="login-form">
+							<h1>Đăng Nhập</h1>
+							<div class="account-logo">
+								<a href="index-2.html"><img src="assets/img/logo-dark.png" alt=""></a>
+							</div>
+							<form action="" method="POST">
+								<div class="form-group">
+									<label>Username</label>
+									<input type="text" class="form-control" name="username">
+								</div>
+								<div class="form-group">
+									<label>Mật khẩu</label>
+									<input type="password" class="form-control" name="password">
+								</div>
+								<div class="form-group text-center">
+									<button class="btn btn-primary account-btn" type="submit" onclick="click()">Đăng nhập</button>
+								</div>
+								
+								<script>
+									function click(){
+										swal ("You are logged in");
+									}
+								</script>
+								<br>
+								<div class="text-center login-link">
+									Chưa có tài khoản? <a href="/signup">Đăng ký</a>
+									<br>
+									<a href="http://localhost:3000/resetpassword">quên mật khẩu</a>
+								</div>
+								
+								
+								
+							</form>
+						</div>
+						<div>
+							
+						</div>
+					</div>
 				</div>
-				
-				
-			</form>
+			</div>
 		</div>
-		<div>
-			
-		</div>
+		
 		<script src="assets/js/jquery-3.2.1.min.js"></script>
 	</body>
 </html>
