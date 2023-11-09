@@ -72,7 +72,9 @@ const meeting= async (doctorId, userId, appointmentId, type, startTime, endTime)
     let meetingUri=`https://api.zoom.us/v2/users/me/meetings`;
     
     let meetingStartTime = moment(startTime);
+    let meetingEndTime=moment(endTime);
     let formattedStartTime = meetingStartTime.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
+    let formattedEnTime= meetingEndTime.format('YYYY-MM-DDTHH:mm:ss.SSSZZ');
     const payload={
         
     
@@ -83,6 +85,7 @@ const meeting= async (doctorId, userId, appointmentId, type, startTime, endTime)
             "pre_schedule":false,
             "schedule_for":"ngoclinh140602@gmail.com",
             "start_time":formattedStartTime,
+            "end_date_time":formattedEnTime,
             "timezone":"Asia/Ho_Chi_Minh",
             "topic": `${type}`,
             "type":2,

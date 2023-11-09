@@ -47,14 +47,13 @@ class UserSerVice{
         throw error;
       }
   }
-      //lấy thông tin người dùng qua email
-      static async getUserInfo(email) {
-        try {
-          return await UserModel.findOne({ email });
-        } catch (error) {
-          throw error;
-        }
-      }
+  static async getUserInfo(userId) {
+    try {
+      return await UserModel.findById(userId);
+    } catch (error) {
+      throw error;
+    }
+  }
 
 
 }

@@ -5,6 +5,7 @@ const body_parser=require('body-parser');
 const userRouter= require('./routers/user_router');
 const meetingRouter =require('./routers/meeting_route');
 
+
 const {authorize,redirect, meetings, meeting, updateMeeting, }= require('./zoomhelper')
 
 
@@ -64,6 +65,7 @@ var conversation= require('./controllers/conversation')
 var meetingvideo= require('./controllers/meeting_video')
 var meetingCall= require('./controllers/meeting_voice')
 var zoonmeeting= require('./controllers/zoommeeting')
+
 
 
 const { Socket } = require('socket.io');
@@ -143,6 +145,12 @@ app.use('/api/departments',departmentRouter);
 const notificationRouter = require('./routers/notification_router');
 
 app.use('/notification',notificationRouter);
+
+
+//đánh giá
+const reviewRouter= require('./routers/review_router');
+app.use('/api/',reviewRouter);
+
 
 //zoom meeting
 //ClientId: Bg2wcc_KQvaby26BDF1hrA

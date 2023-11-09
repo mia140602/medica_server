@@ -53,19 +53,39 @@ exports.login= async(req,res,next)=> {
 
 }
 exports.getUserInfo = async (req, res, next) => {
-    try {
-      const token = req.headers['authorization'];
-      const decodedToken = jwt.verify(token, secretKey);
-      const email = decodedToken.email;
-      const user = await UserSerVice.getUserInfo(email);
-      if (!user) {
-        return res.status(404).json({ status: false, message: 'Không tìm thấy người dùng' });
-      }
-      return res.status(200).json({ status: true, data: user });
-    } catch (error) {
-      return res.status(500).json({ status: false, message: 'An error occurred', error: error });
+  try {
+    const userId = req.params.userId;
+    
+    const user = await UserSerVice.getUserInfo(userId);
+    if (!user) {
+      return res.status(404).json({ status: false, message: 'Không tìm thấy người dùng' });
     }
-  };
+
+    // Chuyển đổi tài liệu Mongoose thành đối tượng JavaScript
+    const userObject = user.toObject();
+
+    // Xóa trường _id
+    delete userObject._id;
+
+    return res.status(200).json({ status: true, data: userObject });
+  } catch (error) {
+    return res.status(500).json({ status: false, message: 'Đã xảy ra lỗi', error: error });
+  }
+};
+// exports.getUserInfo = async (req, res, next) => {
+//     try {
+//       const token = req.headers['authorization'];
+//       const decodedToken = jwt.verify(token, secretKey);
+//       const email = decodedToken.email;
+//       const user = await UserSerVice.getUserInfo(email);
+//       if (!user) {
+//         return res.status(404).json({ status: false, message: 'Không tìm thấy người dùng' });
+//       }
+//       return res.status(200).json({ status: true, data: user });
+//     } catch (error) {
+//       return res.status(500).json({ status: false, message: 'An error occurred', error: error });
+//     }
+//   };
   exports.updateProfile = async(req, res, next) => {
     
     try {

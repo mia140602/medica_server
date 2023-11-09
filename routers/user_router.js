@@ -15,7 +15,7 @@ router.get('/messages/:appointmentId',  MessageController.getMessagesByAppointme
 router.post("/registration",UserController.register);
 router.post('/userLogin',UserController.login);
 router.put("/updateProfile", UserController.updateProfile);
-router.get("/getUserInfo",UserController.getUserInfo);
+router.get("/getUserInfo/:userId", UserController.getUserInfo);
 
 //chat
 router.post('/userCreateChat',verifyAndAuthorization ,ChatController.accessChat);
