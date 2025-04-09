@@ -18,7 +18,8 @@ const appointmentSchema = new Schema({
       },
       type:{
         type: String,
-        required: true
+        required: true,
+        default:"chat"
       },
       problem:{
         type:String

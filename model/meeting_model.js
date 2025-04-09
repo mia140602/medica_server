@@ -5,7 +5,7 @@ const { Schema } = mongoose;
 
 
 var MeetingSchema = new Schema({
-    zoomMeetingId: { type: BigInt },
+    // zoomMeetingId: { type: BigInt },
     user: { type: mongoose.Schema.ObjectId, ref: 'users' },
     doctor: { type: mongoose.Schema.ObjectId, ref: 'doctors' },
     appointment: { type: mongoose.Schema.ObjectId, ref: 'appointments' },
@@ -29,7 +29,7 @@ MeetingSchema.statics.createMeeting = function(doctorId, userId, appointmentId, 
         type: type,
         startTime: startTime,
         endTime: endTime,
-        zoomMeetingId:zoomMeetingId,
+        // zoomMeetingId:zoomMeetingId,
         zoomMeetingUrl:zoomMeetingUrl
     });
 };

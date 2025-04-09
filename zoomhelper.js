@@ -21,6 +21,7 @@ const redirect=async (code)=>{
         headers: {
             "Content-Type":"application/x-www-form-urlencoded",
             "Authorization":"Basic"+ Buffer.from(`${process.env.ZOOM_CLIENT_ID}:${process.env.ZOOM_CLIENT_SECRET}`).toString('base64')
+            // "Authorization":"Basic"+ process.env.access_token
 
         },
         data: data
@@ -81,7 +82,7 @@ const meeting= async (doctorId, userId, appointmentId, type, startTime, endTime)
             "agenda": `${type}`,
             "default_password": false,
             "duration": 30,
-            "password":"112345678",
+            "password":"12345678",
             "pre_schedule":false,
             "schedule_for":"ngoclinh140602@gmail.com",
             "start_time":formattedStartTime,

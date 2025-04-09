@@ -5,6 +5,9 @@ const body_parser=require('body-parser');
 const userRouter= require('./routers/user_router');
 const meetingRouter =require('./routers/meeting_route');
 
+const flash= require('connect-flash');
+
+
 
 const {authorize,redirect, meetings, meeting, updateMeeting, }= require('./zoomhelper')
 
@@ -29,7 +32,7 @@ var async = require ('async');
 var nodmailer = require ('nodemailer');
 var crypto = require ('crypto');
 var expressValidator = require ('express-validator');
-var  sweetalert = require('sweetalert2');
+
 
 
 const app=express();
@@ -83,13 +86,13 @@ app.use(express.static('./public'));
 app.use(bodyParser.urlencoded({extended : true}));
 app.use(bodyParser.json());
 app.use(cookie());
-// app.use(session({
-//     secret: 'secret',
-//     resave: true,
-//     saveUninitialized: true,
-//     cookie: { secure: true }
-// }));
-
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true,
+    // cookie: { maxAge: 60000 }
+}));
+app.use(flash());
 //app.use(expressValidator());
 
 // var server =app.listen(3000 , function(){
@@ -154,7 +157,7 @@ app.use('/api/',reviewRouter);
 
 //zoom meeting
 //ClientId: Bg2wcc_KQvaby26BDF1hrA
-//Client Secret: L0DHsBRAM6kmWeiiodZpz00UVtgU8XC7
+// //Client Secret: L0DHsBRAM6kmWeiiodZpz00UVtgU8XC7
 
 
 app.get('/api/zoom/authorize', async function(req, res){
@@ -170,6 +173,7 @@ app.get('/api/zoom/redirect', async function (req, res){
     // sessionStorage.setItem('zoomtoken',result.access_token);
     // req.session.zoomtoken = data.access_token;
     process.env.access_token= data.access_token;
+    console.log("Token hiện tại:  "+process.env.access_token);
  
     return res.json(data);
 
@@ -184,8 +188,6 @@ app.get('/api/zoom/meetings', async (req,res)=>{
 app.post('/api/zoom/meeting',async (req,res)=>{
     let rerult= await meeting(req.body);
     return res.json(rerult);
-
-
 });
 app.patch('/api/zoom/meetings/:id', async (req,res)=>{
     let meeingUpdate= await updateMeeting(req.params.id,req.body);

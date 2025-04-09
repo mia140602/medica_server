@@ -2,7 +2,7 @@ var express = require('express');
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var DoctorModel = require("../model/doctor_model");
-var sweetalert = require('sweetalert2');
+
 const { check, validationResult } = require('express-validator');
 var router = express.Router();
 

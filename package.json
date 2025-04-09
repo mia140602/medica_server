@@ -34,7 +34,6 @@
     "path": "^0.12.7",
     "qs": "^6.11.2",
     "random-token": "^0.0.8",
-    "socket.io": "^2.5.0",
-    "sweetalert2": "^11.7.31"
+    "socket.io": "^2.5.0"
   }
 }
